@@ -1,0 +1,3 @@
+"min","max","age","susceptible","resistant"
+NA,18,"<19",151,65
+19,NA,">18",1337,777

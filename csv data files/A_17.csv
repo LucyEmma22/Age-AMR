@@ -1,0 +1,3 @@
+"min","max","age","susceptible","resistant"
+NA,34,"<35",413,262
+35,NA,">34",338,335

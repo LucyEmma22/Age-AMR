@@ -1,0 +1,4 @@
+min,max,age,susceptible,resistant
+,19,<20,85,21
+20,60,40,524,64
+61,,>60,513,97
