@@ -1,4 +1,4 @@
-setwd("~/OneDrive - University of Edinburgh/New mcmc model results")
+setwd("~/OneDrive - University of Edinburgh/Age_AMR/Age_AMR_Github")
 library(lme4)
 library(ROCR)
 library(cvAUC)
