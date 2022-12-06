@@ -45,9 +45,28 @@ sample_size_plot<-ggplot(filter(number_of_papers_datasets_and_samples,class!="Al
   theme(axis.text.x=element_text(angle=20,hjust=1))+
   theme(text=element_text(family="Helvetica",size=12))
 
-# Plot Random Variance from mcmc model
+# Load model results
 load("~/Downloads/New mcmc model results/mcmc_models_new.Rdata")
 
+# Plot Trace 
+plot.MCMCglmm(mcmc_model)
+
+# Plot random effects histograms
+par(mfrow = c(3,4))
+hist(mcmc(mcmc_model$VCV)[,"paper"],main="Paper",xlab="Variance")
+hist(mcmc(mcmc_model$VCV)[,"paper_dataset"],main="Dataset",xlab="Variance")
+hist(mcmc(mcmc_model$VCV)[,"(Intercept):(Intercept).class"],main="Class (Intercept)",xlab="Variance")
+hist(mcmc(mcmc_model$VCV)[,"poly(age_scaled, 2, raw = TRUE)1:poly(age_scaled, 2, raw = TRUE)1.class"],main="Class (Linear)",xlab="Variance")
+hist(mcmc(mcmc_model$VCV)[,"poly(age_scaled, 2, raw = TRUE)2:poly(age_scaled, 2, raw = TRUE)2.class"],main="Class (Quadratic)",xlab="Variance")
+hist(mcmc(mcmc_model$VCV)[,"(Intercept):(Intercept).genus"],main="Genus (Intercept)",xlab="Variance")
+hist(mcmc(mcmc_model$VCV)[,"poly(age_scaled, 2, raw = TRUE)1:poly(age_scaled, 2, raw = TRUE)1.genus"],main="Genus (Linear)",xlab="Variance")
+hist(mcmc(mcmc_model$VCV)[,"poly(age_scaled, 2, raw = TRUE)2:poly(age_scaled, 2, raw = TRUE)2.genus"],main="Genus (Quadratic)",xlab="Variance")
+hist(mcmc(mcmc_model$VCV)[,"(Intercept):(Intercept).class:genus"],main="Interaction (Intercept)",xlab="Variance")
+hist(mcmc(mcmc_model$VCV)[,"poly(age_scaled, 2, raw = TRUE)1:poly(age_scaled, 2, raw = TRUE)1.class:genus"],main="Interaction (Linear)",xlab="Variance")
+hist(mcmc(mcmc_model$VCV)[,"poly(age_scaled, 2, raw = TRUE)2:poly(age_scaled, 2, raw = TRUE)2.class:genus"],main="Interaction (Quadratic)",xlab="Variance")
+par(mfrow=c(1,1)) 
+
+# Plot Random Variance from mcmc model
 fixed_posterior<-as.data.frame(summary(mcmc_model)$solutions) %>% select(1,2,3,5) %>% rename("Mode"=post.mean) %>% rename("Lower 95% CI"='l-95% CI') %>% rename("Upper 95% CI"='u-95% CI') %>% rename("P Value"='pMCMC') %>% mutate(Term=c(paste("\U03B2\U2080"),paste("\U03B2\U2081"),paste("\U03B2\U2081\u00B2"))) %>% remove_rownames()
 random_variance<-as.data.frame(summary(mcmc_model)$Gcovariances[c(1,2,3,7,11,12,16,20,21,25,29),]) %>% rename("Variance"=post.mean) %>% mutate(Effect=c("Paper","Dataset","Antibiotic","Antibiotic","Antibiotic","Bacteria","Bacteria","Bacteria","Anitbiotic:Bacteria","Anitbiotic:Bacteria","Anitbiotic:Bacteria")) %>% mutate(Term=c(paste("\U03B2\U2080"),paste("\U03B2\U2080"),paste("\U03B2\U2080"),paste("\U03B2\U2081"),paste("\U03B2\U2081\u00B2"),paste("\U03B2\U2080"),paste("\U03B2\U2081"),paste("\U03B2\U2081\u00B2"),paste("\U03B2\U2080"),paste("\U03B2\U2081"),paste("\U03B2\U2081\u00B2"))) %>% remove_rownames()
 random_variance$Effect <- factor(random_variance$Effect, levels = unique(random_variance$Effect))
