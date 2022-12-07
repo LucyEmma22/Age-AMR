@@ -1,4 +1,4 @@
-setwd("~/OneDrive - University of Edinburgh/Age_AMR/Age_AMR_Github")
+setwd("~/OneDrive - University of Edinburgh/Age_AMR/Age-AMR_Github")
 library(tidyr)
 library(tidyverse)
 library(dplyr)
@@ -48,8 +48,31 @@ sample_size_plot<-ggplot(filter(number_of_papers_datasets_and_samples,class!="Al
 # Load model results
 load("~/Downloads/New mcmc model results/mcmc_models_new.Rdata")
 
-# Plot Trace 
-plot.MCMCglmm(mcmc_model)
+# Plot Trace and density
+plot(mcmc_model$VCV[,c(1,2,3,7,11,12,16,20,21,25,29,30)])
+plot(mcmc_model$Sol[,1:3])
+
+#plot.MCMCglmm(mcmc_model)
+#plot(mcmc_model$VCV[,1:4])
+# plot(mcmc_model$VCV[,1],main="Paper")
+# plot(mcmc_model$VCV[,2],main="Dataset")
+# plot(mcmc_model$VCV[,3],main="Class (Intercept)")
+# plot(mcmc_model$VCV[,7],main="Class (Linear)")
+# plot(mcmc_model$VCV[,11],main="Class (Quadratic)")
+# plot(mcmc_model$VCV[,12],main="Genus (Intercept)")
+# plot(mcmc_model$VCV[,16],main="Genus (Linear)")
+# plot(mcmc_model$VCV[,20],main="Genus (Quadratic)")
+# plot(mcmc_model$VCV[,21],main="Class-Genus (Intercept)")
+# plot(mcmc_model$VCV[,25],main="Class-Genus (Linear)")
+# plot(mcmc_model$VCV[,29],main="Class-Genus (Quadratic)")
+# plot(mcmc_model$VCV[,30],main="Units")
+# 
+# random_effects<-data.frame(mcmc_model$VCV)[,c(1:3,7,11,12,16,20,21,25,29,30)] %>% mutate(iteration=1:5000)
+# colnames(random_effects)<-c("Paper","Dataset","Class_Intercept","Class_Linear", "Class_Quadratic", "Genus_Intercept","Genus_Linear", "Genus_Quadratic", "Class:Genus_Intercept","Class:Genus_Linear", "Class:Genus_Quadratic","Units", "Iteration")
+# random_effects<-random_effects %>% gather("Random_Effect","Value",-Iteration)
+# trace<-ggplot(data=random_effects,aes(x=Iteration,y=Value))+facet_wrap(~Random_Effect,scales = "free")+geom_line()+theme_light()
+# density<-ggplot(data=random_effects,aes(x=Value))+facet_wrap(~Random_Effect,scales = "free")+geom_density()+theme_light()
+# trace / density
 
 # Plot random effects histograms
 par(mfrow = c(3,4))
