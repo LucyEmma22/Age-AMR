@@ -96,7 +96,7 @@ density_random2<-ggplot(data=filter(random_effects, Random_Effect %in% c("Genus_
 trace_random2 + theme(text=element_text(size=14)) + density_random2 + theme(text=element_text(size=14))
 
 # Plot random effects histograms
-par(mfrow = c(3,4))
+par(mfrow = c(4,3))
 hist(mcmc(mcmc_model$VCV)[,"paper"],main="Paper",xlab="Variance")
 hist(mcmc(mcmc_model$VCV)[,"paper_dataset"],main="Dataset",xlab="Variance")
 hist(mcmc(mcmc_model$VCV)[,"(Intercept):(Intercept).class"],main="Class (Intercept)",xlab="Variance")
