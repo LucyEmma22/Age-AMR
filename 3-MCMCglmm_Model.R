@@ -1,4 +1,4 @@
-setwd("~/OneDrive - University of Edinburgh/Age_AMR/Age_AMR_Github")
+setwd("~/OneDrive - University of Edinburgh/Age_AMR/Age-AMR_Github")
 
 library(MCMCglmm)
 library(tidyr)
@@ -16,8 +16,6 @@ library(modeest)
 
 data<-read.csv("dataset_2.csv",header=TRUE)
 
-# MODEL
-
 nitt = 1100000
 burnin = 100000
 thin = 200
@@ -25,10 +23,6 @@ thin = 200
 # FULL QUADRATIC MCMC MODEL
 prior <- list(R = list(V = 1, nu = 0.002), G = list(G1 = list(V = 1, nu = 0.002),G2 = list(V = 1, nu = 0.002),G3 = list(V = diag(3), n = 3,alpha.mew=c(0,0,0),alpha.V=diag(3)*100),G4 = list(V = diag(3), n = 3,alpha.mew=c(0,0,0),alpha.V=diag(3)*100),G5 = list(V = diag(3), n = 3,alpha.mew=c(0,0,0),alpha.V=diag(3)*100)))
 mcmc_model <- MCMCglmm(cbind(resistant, susceptible) ~ poly(age_scaled, 2, raw = TRUE),random = ~paper +paper_dataset +us(1 + poly(age_scaled, 2, raw = TRUE)):class +us(1 + poly(age_scaled, 2, raw = TRUE)):genus +us(1 + poly(age_scaled, 2, raw = TRUE)):class:genus, data = data, family = "multinomial2", prior = prior, nitt = nitt, burnin = burnin, thin = thin, pr = TRUE)
-
-# FULL QUADRATIC GLMER MODEL
-library(lme4)
-model<-glmer(cbind(resistant, susceptible)~age_scaled+I(age_scaled^2)+(1|paper)+(1|paper_dataset)+(1+age_scaled+I(age_scaled^2)|genus)+(1+age_scaled+I(age_scaled^2)|class)+(1+age_scaled+I(age_scaled^2)|genus:class),data=data,family="binomial")
 
 # FULL LINEAR MCMC MODEL
 prior_linear <- list(R = list(V = 1, nu = 0.002), G = list(G1 = list(V = 1, nu = 0.002),G2 = list(V = 1, nu = 0.002),G3 = list(V = diag(2), n = 2,alpha.mew=c(0,0),alpha.V=diag(2)*100),G4 = list(V = diag(2), n = 2,alpha.mew=c(0,0),alpha.V=diag(2)*100),G5 = list(V = diag(2), n = 2,alpha.mew=c(0,0),alpha.V=diag(2)*100)))
@@ -39,7 +33,6 @@ prior_no_random_effects <- list(R = list(V = 1, nu = 0.002))
 mcmc_model_no_random_effects <- MCMCglmm(cbind(resistant, susceptible) ~ poly(age_scaled, 2, raw = TRUE), data = data,family = "multinomial2", prior = prior_no_random_effects, nitt = nitt, burnin = burnin, thin = thin, pr = TRUE)
 
 save(list = c("mcmc_model", "mcmc_model_linear","mcmc_model_no_random_effects"),file="mcmc_models_new.Rdata")
-
 
 # Gelman and Rubin
 

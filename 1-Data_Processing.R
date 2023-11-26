@@ -4,7 +4,7 @@ library(dplyr)
 library(gtools)
 
 # Read in CSV files and store as a single dataframe
-setwd("~/OneDrive - University of Edinburgh/Age_AMR/Age_AMR_Github/csv data files")
+setwd("~/OneDrive - University of Edinburgh/Age_AMR/Age-AMR_Github/csv data files")
 file_list<-list.files()
 all_data<-data.frame()
 
@@ -33,7 +33,7 @@ all_data<-anti_join(all_data,no_resistance,by="paper_dataset")
 all_data$paper<-as.numeric(all_data$paper)
 
 # Define drug, bug, class and genus (ESBL and B-lactamase are tested using cephalosporins, drug for AmpC not defined) for each dataset
-setwd("~/OneDrive - University of Edinburgh/Age_AMR/Age_AMR_Github")
+setwd("~/OneDrive - University of Edinburgh/Age_AMR/Age-AMR_Github")
 
 master_spreadsheet<-read.csv("Final Sorted Paper List.csv")[1:2] %>% rename(paper=Paper) %>% separate_rows(Coder, sep="; ",convert = TRUE)  %>% separate(Coder,c("dataset","coder"),sep=" = ")  %>% separate(coder,c("drug","bug","coder"),sep="_")%>% 
   mutate(drug=ifelse(drug=="ESBL"|drug=="B-lactamase","cephalosporin",drug)) %>% filter(drug!="AmpC") %>%

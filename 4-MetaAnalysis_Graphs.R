@@ -7,10 +7,11 @@ library(MCMCglmm)
 library(ggnewscale) 
 library(patchwork) 
 library(pals)
+library(cowplot)
 
 data<-read.csv("dataset_2.csv")
 
-# Calculate number of papers, datasets adn samples for each class and genus
+# Calculate number of papers, datasets and samples for each class and genus
 data$interaction<-paste0(data$class,":",data$genus)
 data1<-data
 # Number papers
@@ -46,33 +47,53 @@ sample_size_plot<-ggplot(filter(number_of_papers_datasets_and_samples,class!="Al
   theme(text=element_text(family="Helvetica",size=12))
 
 # Load model results
-load("~/Downloads/New mcmc model results/mcmc_models_new.Rdata")
+load("~/OneDrive - University of Edinburgh/Age_AMR/mcmc_models_new.Rdata")
 
-# Plot Trace and density
-plot(mcmc_model$VCV[,c(1,2,3,7,11,12,16,20,21,25,29,30)])
-plot(mcmc_model$Sol[,1:3])
+# Plot trace and density of fixed and random effects
+fixed_effects<-data.frame(mcmc_model$Sol)[,(1:3)] %>% mutate(iteration=1:5000)
+colnames(fixed_effects)<-c("Age_Intercept","Age_Linear","Age_Quadratic", "Iteration")
+fixed_effects<-fixed_effects %>% gather("Fixed_Effect","Value",-Iteration)
+trace_fixed<-ggplot(data=fixed_effects,aes(x=Iteration,y=Value))+
+  facet_wrap(~Fixed_Effect,scales = "free", ncol=1)+
+  geom_line(size=0.1)+
+  theme_light()+
+  theme(strip.text.x = element_text(color = "black", margin = margin(0, 0, 0.05, 0, "cm")),strip.background = element_rect(fill="white"))
+density_fixed<-ggplot(data=fixed_effects,aes(x=Value))+
+  facet_wrap(~Fixed_Effect,scales = "free", ncol=1)+
+  geom_density()+
+  theme_light()+
+  labs(y='Density')+
+  theme(strip.text.x = element_text(color = "black", margin = margin(0, 0, 0.05, 0, "cm")),strip.background = element_rect(fill="white"))
+trace_fixed + theme(text=element_text(size=14)) + density_fixed + theme(text=element_text(size=14))
 
-#plot.MCMCglmm(mcmc_model)
-#plot(mcmc_model$VCV[,1:4])
-# plot(mcmc_model$VCV[,1],main="Paper")
-# plot(mcmc_model$VCV[,2],main="Dataset")
-# plot(mcmc_model$VCV[,3],main="Class (Intercept)")
-# plot(mcmc_model$VCV[,7],main="Class (Linear)")
-# plot(mcmc_model$VCV[,11],main="Class (Quadratic)")
-# plot(mcmc_model$VCV[,12],main="Genus (Intercept)")
-# plot(mcmc_model$VCV[,16],main="Genus (Linear)")
-# plot(mcmc_model$VCV[,20],main="Genus (Quadratic)")
-# plot(mcmc_model$VCV[,21],main="Class-Genus (Intercept)")
-# plot(mcmc_model$VCV[,25],main="Class-Genus (Linear)")
-# plot(mcmc_model$VCV[,29],main="Class-Genus (Quadratic)")
-# plot(mcmc_model$VCV[,30],main="Units")
-# 
-# random_effects<-data.frame(mcmc_model$VCV)[,c(1:3,7,11,12,16,20,21,25,29,30)] %>% mutate(iteration=1:5000)
-# colnames(random_effects)<-c("Paper","Dataset","Class_Intercept","Class_Linear", "Class_Quadratic", "Genus_Intercept","Genus_Linear", "Genus_Quadratic", "Class:Genus_Intercept","Class:Genus_Linear", "Class:Genus_Quadratic","Units", "Iteration")
-# random_effects<-random_effects %>% gather("Random_Effect","Value",-Iteration)
-# trace<-ggplot(data=random_effects,aes(x=Iteration,y=Value))+facet_wrap(~Random_Effect,scales = "free")+geom_line()+theme_light()
-# density<-ggplot(data=random_effects,aes(x=Value))+facet_wrap(~Random_Effect,scales = "free")+geom_density()+theme_light()
-# trace / density
+random_effects<-data.frame(mcmc_model$VCV)[,c(1:3,7,11,12,16,20,21,25,29,30)] %>% mutate(iteration=1:5000)
+colnames(random_effects)<-c("Paper","Dataset","Class_Intercept","Class_Linear", "Class_Quadratic", "Genus_Intercept","Genus_Linear", "Genus_Quadratic", "Class:Genus_Intercept","Class:Genus_Linear", "Class:Genus_Quadratic","Units", "Iteration")
+random_effects<-random_effects %>% gather("Random_Effect","Value",-Iteration)
+trace_random1<-ggplot(data=filter(random_effects, Random_Effect %in% c("Paper","Dataset","Class_Intercept","Class_Linear", "Class_Quadratic","Units")),aes(x=Iteration,y=Value))+
+  facet_wrap(~Random_Effect,scales = "free", ncol=1)+
+  geom_line(size=0.1)+
+  theme_light()+
+  theme(strip.text.x = element_text(color = "black", margin = margin(0, 0, 0.05, 0, "cm")),strip.background = element_rect(fill="white"))
+density_random1<-ggplot(data=filter(random_effects, Random_Effect %in% c("Paper","Dataset","Class_Intercept","Class_Linear", "Class_Quadratic","Units")),aes(x=Value))+
+  facet_wrap(~Random_Effect,scales = "free", ncol=1)+
+  geom_density()+
+  theme_light()+
+  labs(y='Density')+
+  theme(strip.text.x = element_text(color = "black", margin = margin(0, 0, 0.05, 0, "cm")),strip.background = element_rect(fill="white"))
+trace_random1 + theme(text=element_text(size=14)) + density_random1 + theme(text=element_text(size=14))
+
+trace_random2<-ggplot(data=filter(random_effects, Random_Effect %in% c("Genus_Intercept","Genus_Linear", "Genus_Quadratic", "Class:Genus_Intercept","Class:Genus_Linear", "Class:Genus_Quadratic")),aes(x=Iteration,y=Value))+
+  facet_wrap(~Random_Effect,scales = "free", ncol=1)+
+  geom_line(size=0.1)+
+  theme_light()+
+  theme(strip.text.x = element_text(color = "black", margin = margin(0, 0, 0.05, 0, "cm")),strip.background = element_rect(fill="white"))
+density_random2<-ggplot(data=filter(random_effects, Random_Effect %in% c("Genus_Intercept","Genus_Linear", "Genus_Quadratic", "Class:Genus_Intercept","Class:Genus_Linear", "Class:Genus_Quadratic")),aes(x=Value))+
+  facet_wrap(~Random_Effect,scales = "free", ncol=1)+
+  geom_density()+
+  theme_light()+
+  labs(y='Density')+
+  theme(strip.text.x = element_text(color = "black", margin = margin(0, 0, 0.05, 0, "cm")),strip.background = element_rect(fill="white"))
+trace_random2 + theme(text=element_text(size=14)) + density_random2 + theme(text=element_text(size=14))
 
 # Plot random effects histograms
 par(mfrow = c(3,4))
@@ -96,12 +117,14 @@ random_variance$Effect <- factor(random_variance$Effect, levels = unique(random_
 
 random_variance_plot<-ggplot(random_variance, aes(y=Variance,x=Term))+
   geom_bar(position=position_dodge(), stat="identity",colour="white", aes(fill=Effect))+
-  scale_fill_manual(name="Random Effect",values=c("grey40","grey70","mediumpurple","mediumseagreen","goldenrod"))+
+  scale_fill_manual(name=NULL,values=c("grey40","grey70","mediumpurple","mediumseagreen","goldenrod"))+
   geom_errorbar(aes(ymin=`l-95% CI`, ymax=`u-95% CI`,group=Effect), width=0.2,position=position_dodge(0.9))+
   labs(x = "Coefficient", y = "Variance")+
   theme_light()+
   theme(text=element_text(family="Helvetica",size=12))+
-  theme(plot.title = element_text(hjust=-0.2))
+  theme(plot.title = element_text(hjust=-0.2)) +
+  theme(legend.position = "bottom") +
+  guides(fill = guide_legend(nrow = 2))
 
 # Plot overall curve from mcmc model
 all_average_curves<-read.csv("all_average_curves_new.csv",header=T) %>% 
@@ -127,11 +150,10 @@ colours<- c("#AA0DFE", "#3283FE", "#85660D", "#782AB6", "#565656",
               "#F8A19F", "#90AD1C", "#F6222E", "#1CFFCE", "#2ED9FF", 
               "#B10DA1", "#C075A6", "#FC1CBF", "#B00068", "#FBE426", 
               "#FA0087")
-#colours<-c(polychrome()[1:25])
 names(colours)<-sort(unique(all_average_curves$genus))
 
 all_curve_plots<-ggplot(all_average_curves,aes(age,mean))+
-  geom_point(data=data,aes(x=age,y=resistant/(resistant+susceptible),colour=genus,shape=class,fill=genus),size=0.8)+
+  #geom_point(data=data,aes(x=age,y=resistant/(resistant+susceptible),colour=genus,shape=class,fill=genus),size=0.8)+
   geom_line(aes(colour=genus))+
   geom_ribbon(aes(ymin =lower, ymax = upper,fill=genus,colour=genus), outline.type = "both", alpha = 0.2,linetype="dashed",show.legend=F)+
   ylim(0,1)+
@@ -143,12 +165,15 @@ all_curve_plots<-ggplot(all_average_curves,aes(age,mean))+
   scale_shape_manual(values=shapes)+
   facet_grid(rows=vars(str_wrap(class,15)),cols=vars(genus),switch = "both",drop=T)+
   theme(axis.text.x=element_blank(),axis.ticks.x=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank(),
-        legend.position="none", strip.text.y.left = element_text(angle = 0,hjust=1),strip.text.x.bottom = element_text(angle = 20))
+        legend.position="none", strip.text.y.left = element_text(angle = 0,hjust=1),strip.text.x.bottom = element_text(angle = 90,hjust=1))
 
 # Plot 4 example curves
 examples<-c("Penicillins:Proteus","Polymyxins:Pseudomonas","Quinolones:Acinetobacter","Cephalosporins:Streptococcus")
 example_plot_data<- data %>% rename(id=interaction) %>% filter(id %in% examples) 
+example_plot_data <- example_plot_data %>% mutate(facet_label = gsub(":", " \n ", id))
 example_curves<-filter(all_average_curves,id %in% examples) 
+example_curves <- example_curves %>% mutate(facet_label = gsub(":", " \n ", id))
+examples_stacked<-c("Penicillins \n Proteus", "Polymyxins \n Pseudomonas", "Quinolones \n Acinetobacter", "Cephalosporins \n Streptococcus")
 example_plots<-ggplot(example_curves,aes(age,mean))+
   geom_point(data=example_plot_data,aes(x=age,y=resistant/(resistant+susceptible),colour=genus,shape=class,fill=genus),size=0.8)+
   geom_line(aes(colour=genus))+
@@ -159,7 +184,7 @@ example_plots<-ggplot(example_curves,aes(age,mean))+
   scale_colour_manual(values=colours)+
   scale_fill_manual(values=colours)+
   scale_shape_manual(values=shapes)+
-  facet_grid(rows=vars(factor(id, levels = examples)),scales="free_y")+
+  facet_grid(cols=vars(factor(facet_label, levels = examples_stacked)),scales="free_y")+
   theme(legend.position="none", strip.text.y=element_blank(),text=element_text(family="Helvetica",size=10))
 
 # Calculate maximum fold change in resistance frequency for all curves
@@ -174,14 +199,13 @@ minmax<-all_average_curves %>% group_by(id) %>%
 # Plot maximum fold change in resistance frequency for all curves
 minmax$class <- factor(minmax$class, levels = rev(sort(as.vector(unique(minmax$class)))))
 curve_bubbleplot<-ggplot(minmax, aes(x = genus, y = fct_relabel(class,str_wrap,width = 16)))+
-  geom_point(aes(size=log(1/var),fill=log(directional_fold_change)),shape=21,stroke=0.5,colour="grey")+
+  geom_point(aes(size=log(1/var),fill=log(directional_fold_change)),shape=21,stroke=0.3,colour="grey")+
   scale_size(name= "Log (1/Variance)",range = c(1,10))+
   theme_light()+
   scale_fill_gradient2(name="Log (Fold Change in Resistance Frequency)",low="mediumseagreen",mid="white",high = "mediumpurple",midpoint=0)+
   labs(x=NULL,y=NULL)+
-  theme(axis.text.x=element_text(angle=20,hjust=1),text=element_text(family="Helvetica",size=10),
-        legend.background = element_rect(fill="white",size=0.5, linetype="solid", colour ="grey"),legend.title.align=0.5,legend.position="bottom",legend.box="vertical")+
-  guides(size = guide_legend(override.aes = list(colour = "grey",shape=21,stroke=1)))+
+  theme(axis.text.x=element_text(angle=30,hjust=1),text=element_text(family="Helvetica",size=10), legend.position = "none",legend.title.align=0.5)+
+  guides(size = guide_legend(override.aes = list(colour = "grey",shape=21,stroke=1)), title.position = "top")+
   new_scale("colour") +
   geom_point(data=filter(minmax,id %in% examples),aes(x = genus, y = fct_relabel(class,str_wrap,width = 16),colour=genus,size=log(1/var)+1,shape=class),stroke=1,show.legend=FALSE) +
   scale_colour_manual(values=colours)+
@@ -194,23 +218,56 @@ average_parameters<-read.csv("average_parameters.csv",header=TRUE) %>%
   distinct() %>% filter(str_detect(id, ":")) %>%
   spread(term,mean) %>% separate(id,c("class","genus"),sep=":",remove=F) 
 point_graph<-ggplot(data = filter(average_parameters,!id %in% examples),aes(Linear,Quadratic))+
+  geom_hline(yintercept=0, linetype="solid",colour="grey", size=0.2)+
+  geom_vline(xintercept=0, linetype="solid",colour="grey", size=0.2)+
+  geom_function(fun = function(x) (-x/2),colour="grey",linetype="solid", size=0.2)+
   geom_point(aes(col=genus,shape=class),size=1)+
   geom_point(data=filter(average_parameters,id %in% examples),aes(col=genus,shape=class),size=3,stroke=1,show.legend=F)+
   labs(x = paste("\U03B2\U1D62"), y = paste("\U03B2\U1D62\U00B2"))+
   theme_light()+
-  geom_hline(yintercept=0, linetype="solid",colour="grey")+
-  geom_vline(xintercept=0, linetype="solid",colour="grey")+
-  geom_function(fun = function(x) (-x/2),colour="grey",linetype="solid")+
   scale_colour_manual(name="Bacteria",values=colours)+
   scale_shape_manual(name="Antibiotic",values=shapes)+
-  guides(colour=guide_legend(nrow=4,byrow=TRUE,keyheight = 0.1,keywidth=0.1))+
-  guides(shape=guide_legend(nrow=4,byrow=TRUE,keyheight = 0.1,keywidth=0.1))+
-  theme(text=element_text(family="Helvetica",size=10),
-        legend.background = element_rect(fill="white",size=0.5, linetype="solid", colour ="grey"),legend.title.align=0.5,
-        legend.position="bottom",legend.box="vertical")
+  theme(text=element_text(family="Helvetica",size=10), legend.position = "none")+
+  guides(colour=guide_legend(ncol=2,byrow=FALSE,keyheight = 0.3,keywidth=0.3))+
+  guides(shape=guide_legend(ncol=2 ,byrow=FALSE,keyheight = 0.3,keywidth=0.3))
 
 # Arranging Plots
 sample_size_plot + plot_annotation(title="B")
 p_overall + random_variance_plot + plot_annotation(tag_levels = 'A') 
-point_graph + example_plots + curve_bubbleplot + plot_layout(widths = c(5,1,4)) + plot_annotation(tag_levels = 'A')
+point_graph / example_plots / curve_bubbleplot + plot_layout(heights = c(4,1,4)) + plot_annotation(tag_levels = 'A')
+legend1 <- get_legend(point_graph + theme(legend.position = "right",legend.box="vertical"))
+legend2 <- get_legend(curve_bubbleplot+ theme(legend.position = "right", legend.box="vertical"))
+plot_grid(legend1, ncol = 1)
+plot_grid(legend2, ncol = 1)
 all_curve_plots
+
+# Graph for change in population structure (2022, 2050, 2100)
+population<-read.csv("population.csv") %>% filter(year %in% c(2022, 2050,2100)) %>% 
+  group_by(year) %>% 
+  summarise(total=sum(population), age=age, population=population) %>% ungroup() %>%
+  mutate(proportion=population/total)
+
+ggplot(population, aes(age,proportion,colour=as.factor(year)))+
+  geom_line()+
+  labs(x="Age", y="Proportion of the Population")+
+  scale_colour_manual(values=c("mediumpurple","indianred","mediumseagreen"), name="Year")+
+  theme_light()
+
+# Graph for change in resistance frequency with population structure
+average_resistance<-read.csv("population.csv") %>% 
+  group_by(year) %>% 
+  summarise(total=sum(population), age=age, population=population) %>% ungroup() %>%
+  mutate(proportion=population/total) %>% 
+  full_join(example_curves %>% select(class,genus,age,mean) %>% mutate(age=round(age))) %>%
+  na.omit() %>%
+  mutate(resistance=proportion*mean)%>% 
+  group_by(class,genus,year) %>% 
+  summarise(mean_resistance=sum(resistance)) %>% 
+  mutate(id=paste0(class," : ",genus))
+
+ggplot(average_resistance, aes(year, mean_resistance))+
+  geom_line(aes(colour=genus))+
+  labs(x="Year", y="Resistance Frequency")+
+  theme_light()+
+  theme(legend.position="none")+
+  scale_colour_manual(values=colours,name="Antibiotic:Bacteria", labels=c("Quinolones:Acinetobacter", "Penicillins:Proteus","Polymyxins:Pseudomonas","Cephalosporins:Streptococcus"))
