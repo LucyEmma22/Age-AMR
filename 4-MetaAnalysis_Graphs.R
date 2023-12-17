@@ -112,7 +112,7 @@ par(mfrow=c(1,1))
 
 # Plot Random Variance from mcmc model
 fixed_posterior<-as.data.frame(summary(mcmc_model)$solutions) %>% select(1,2,3,5) %>% rename("Mode"=post.mean) %>% rename("Lower 95% CI"='l-95% CI') %>% rename("Upper 95% CI"='u-95% CI') %>% rename("P Value"='pMCMC') %>% mutate(Term=c(paste("\U03B2\U2080"),paste("\U03B2\U2081"),paste("\U03B2\U2081\u00B2"))) %>% remove_rownames()
-random_variance<-as.data.frame(summary(mcmc_model)$Gcovariances[c(1,2,3,7,11,12,16,20,21,25,29),]) %>% rename("Variance"=post.mean) %>% mutate(Effect=c("Paper","Dataset","Antibiotic","Antibiotic","Antibiotic","Bacteria","Bacteria","Bacteria","Anitbiotic:Bacteria","Anitbiotic:Bacteria","Anitbiotic:Bacteria")) %>% mutate(Term=c(paste("\U03B2\U2080"),paste("\U03B2\U2080"),paste("\U03B2\U2080"),paste("\U03B2\U2081"),paste("\U03B2\U2081\u00B2"),paste("\U03B2\U2080"),paste("\U03B2\U2081"),paste("\U03B2\U2081\u00B2"),paste("\U03B2\U2080"),paste("\U03B2\U2081"),paste("\U03B2\U2081\u00B2"))) %>% remove_rownames()
+random_variance<-as.data.frame(summary(mcmc_model)$Gcovariances[c(1,2,3,7,11,12,16,20,21,25,29),]) %>% rename("Variance"=post.mean) %>% mutate(Effect=c("Paper","Dataset","Antibiotic","Antibiotic","Antibiotic","Bacteria","Bacteria","Bacteria","Anitbiotic:Bacteria","Anitbiotic:Bacteria","Anitbiotic:Bacteria")) %>% mutate(Term=c(paste("\U03B2\U2080"),paste("\U03B2\U2080"),paste("\U03B2\U2080"),paste("\U03B2\U2081"),paste("\U03B2\U2082"),paste("\U03B2\U2080"),paste("\U03B2\U2081"),paste("\U03B2\U2082"),paste("\U03B2\U2080"),paste("\U03B2\U2081"),paste("\U03B2\U2082"))) %>% remove_rownames()
 random_variance$Effect <- factor(random_variance$Effect, levels = unique(random_variance$Effect))
 
 random_variance_plot<-ggplot(random_variance, aes(y=Variance,x=Term))+
@@ -223,7 +223,7 @@ point_graph<-ggplot(data = filter(average_parameters,!id %in% examples),aes(Line
   geom_function(fun = function(x) (-x/2),colour="grey",linetype="solid", size=0.2)+
   geom_point(aes(col=genus,shape=class),size=1)+
   geom_point(data=filter(average_parameters,id %in% examples),aes(col=genus,shape=class),size=3,stroke=1,show.legend=F)+
-  labs(x = paste("\U03B2\U1D62"), y = paste("\U03B2\U1D62\U00B2"))+
+  labs(x = paste("\U03B2\U2081"), y = paste("\U03B2\U2082"))+
   theme_light()+
   scale_colour_manual(name="Bacteria",values=colours)+
   scale_shape_manual(name="Antibiotic",values=shapes)+
