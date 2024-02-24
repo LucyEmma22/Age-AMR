@@ -53,3 +53,7 @@ all_data2<-filter(all_data,!class %in% c("Mupirocin", "Rifaximin")) %>% mutate(c
 all_data2$paper<-as.factor(all_data2$paper)
 all_data2<-all_data2[all_data2$resistant+all_data2$susceptible!=0,] # remove rows where there is no one in the age class
 write.csv(all_data2,file="dataset_2.csv",row.names=FALSE)
+
+# "Dataset_with_PMIDs.csv" is provided as a supplementary dataset
+all_data3 <-all_data2 %>% left_join(read.csv("pmid_list.csv") %>% mutate(paper=as.factor(paper)))
+write.csv(all_data2,file="Dataset_with_PMIDs.csv",row.names=FALSE)
