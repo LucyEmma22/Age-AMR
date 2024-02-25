@@ -3,18 +3,24 @@ library(stringr)
 library(dplyr)
 library(gtools)
 
-# Read in CSV files and store as a single dataframe
-setwd("~/OneDrive - University of Edinburgh/Age_AMR/Age-AMR_Github/csv data files")
-file_list<-list.files()
-all_data<-data.frame()
+# # Read in CSV files and store as a single dataframe
+# setwd("~/OneDrive - University of Edinburgh/Age_AMR/Age-AMR_Github/csv data files")
+# file_list<-list.files()
+# all_data<-data.frame()
+# 
+# for (i in 1:length(file_list)){
+#   data<-data.frame(read.csv(file_list[i],header=T))[1:5] %>% drop_na(resistant)
+#   colnames(data)<-c("min","max","age","susceptible","resistant")
+#   data$paper_dataset<-gsub(".csv","",file_list[i])
+#   all_data<-rbind(all_data,data)
+# }
+# all_data<-all_data %>% separate(paper_dataset,c("dataset","paper"),sep="_",remove=FALSE) %>% mutate(paper_dataset=gsub("_","",paper_dataset))
+# setwd("~/OneDrive - University of Edinburgh/Age_AMR/Age-AMR_Github")
+# write.csv(all_data,"all_data.csv",row.names=FALSE)
 
-for (i in 1:length(file_list)){
-  data<-data.frame(read.csv(file_list[i],header=T))[1:5] %>% drop_na(resistant)
-  colnames(data)<-c("min","max","age","susceptible","resistant")
-  data$paper_dataset<-gsub(".csv","",file_list[i])
-  all_data<-rbind(all_data,data)
-}
-all_data<-all_data %>% separate(paper_dataset,c("dataset","paper"),sep="_",remove=FALSE) %>% mutate(paper_dataset=gsub("_","",paper_dataset))
+# "all_data.csv", "master_spreadsheet.csv", "Drug Classes.csv" and "genus.csv" are included as supporting files.
+setwd("~/OneDrive - University of Edinburgh/Age_AMR/Age-AMR_Github")
+all_data<-read.csv("all_data.csv")
 
 # Calculate age where upper or lower limit was missing
 all_data$age<-as.numeric(all_data$age)
@@ -33,9 +39,7 @@ all_data<-anti_join(all_data,no_resistance,by="paper_dataset")
 all_data$paper<-as.numeric(all_data$paper)
 
 # Define drug, bug, class and genus (ESBL and B-lactamase are tested using cephalosporins, drug for AmpC not defined) for each dataset
-setwd("~/OneDrive - University of Edinburgh/Age_AMR/Age-AMR_Github")
-
-master_spreadsheet<-read.csv("Final Sorted Paper List.csv")[1:2] %>% rename(paper=Paper) %>% separate_rows(Coder, sep="; ",convert = TRUE)  %>% separate(Coder,c("dataset","coder"),sep=" = ")  %>% separate(coder,c("drug","bug","coder"),sep="_")%>% 
+master_spreadsheet<-read.csv("master_spreadsheet.csv") %>% rename(paper=Paper) %>% separate_rows(Coder, sep="; ",convert = TRUE)  %>% separate(Coder,c("dataset","coder"),sep=" = ")  %>% separate(coder,c("drug","bug","coder"),sep="_")%>% 
   mutate(drug=ifelse(drug=="ESBL"|drug=="B-lactamase","cephalosporin",drug)) %>% filter(drug!="AmpC") %>%
   full_join(read.csv("Drug Classes.csv"),by="drug") %>% full_join(read.csv("genus.csv"),by="bug")
 
@@ -53,7 +57,3 @@ all_data2<-filter(all_data,!class %in% c("Mupirocin", "Rifaximin")) %>% mutate(c
 all_data2$paper<-as.factor(all_data2$paper)
 all_data2<-all_data2[all_data2$resistant+all_data2$susceptible!=0,] # remove rows where there is no one in the age class
 write.csv(all_data2,file="dataset_2.csv",row.names=FALSE)
-
-# "Dataset_with_PMIDs.csv" is provided as a supplementary dataset
-all_data3 <-all_data2 %>% left_join(read.csv("pmid_list.csv") %>% mutate(paper=as.factor(paper)))
-write.csv(all_data2,file="Dataset_with_PMIDs.csv",row.names=FALSE)

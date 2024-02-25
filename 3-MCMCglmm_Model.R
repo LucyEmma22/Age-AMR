@@ -107,7 +107,7 @@ for (i in 1:ncol(all_results)){
 write.csv(average_parameters,file="average_parameters.csv",row.names=FALSE)
 
 ##########################################################################################################
-# CALCULATE THE RESISTANCE FREQUENCY AT AGE 0-100 FOR EVERY EFFECT AT EVERY ITERATION (CURVES)
+# CALCULATE THE RESISTANCE PROBABILITY AT AGE 0-100 FOR EVERY EFFECT AT EVERY ITERATION (CURVES)
 ##########################################################################################################
 
 # CURVES AND MINMAX+AGE: OVERALL, CLASS, GENUS AND INTERACTION
@@ -119,7 +119,7 @@ all_average_curves<-data.frame()
 
 for (j in 1:length(all_drug_bug_interaction_list)){
      
-  # ITERATION CURVES: For each iteration, calculate resistance frequency for age 0-100 based on parameter estimates
+  # ITERATION CURVES: For each iteration, calculate resistance probability for age 0-100 based on parameter estimates
   iteration_curves<-data.frame()
   
   for (i in 1:nrow(all_results)){

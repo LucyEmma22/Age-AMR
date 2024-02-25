@@ -131,7 +131,7 @@ treatment2<-ggplot(results2 %>% filter(varying=='Treatment'), aes(x=age, y=Resis
   geom_point(size=0.5)+
   geom_line()+
   theme_light()+
-  labs(x=NULL, y='Resistance Frequency')+
+  labs(x=NULL, y='Resistance Probability')+
   facet_grid(rows=vars(run),cols=vars(mixing))+
   theme(strip.placement = "outside",
         strip.background =element_rect(fill="white"),
@@ -156,7 +156,7 @@ transmission2<-ggplot(results2 %>% filter(varying=='Transmission'), aes(x=age, y
   geom_point(size=0.5)+
   geom_line()+
   theme_light()+
-  labs(x=NULL, y='Resistance Frequency')+
+  labs(x=NULL, y='Resistance Probability')+
   facet_grid(rows=vars(run),cols=vars(mixing))+
   theme(strip.placement = "outside",
         strip.background =element_rect(fill="white"),
@@ -181,7 +181,7 @@ clearance2<-ggplot(results2 %>% filter(varying=='Clearance'), aes(x=age, y=Resis
   geom_point(size=0.5)+
   geom_line()+
   theme_light()+
-  labs(x=NULL, y='Resistance Frequency')+
+  labs(x=NULL, y='Resistance Probability')+
   facet_grid(rows=vars(run),cols=vars(mixing))+
   theme(strip.placement = "outside",
         strip.background =element_rect(fill="white"),

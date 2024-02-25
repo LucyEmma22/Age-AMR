@@ -133,7 +133,7 @@ all_average_curves<-read.csv("all_average_curves_new.csv",header=T) %>%
 p_overall<-ggplot(filter(all_average_curves,id=="All"),aes(age,mean))+
   geom_line()+
   geom_ribbon(aes(ymin =lower, ymax = upper), outline.type = "both", fill = "grey", alpha = 0.2,linetype="dashed",colour="black")+
-  labs(x = "Age", y = "Resistance Frequency")+
+  labs(x = "Age", y = "Resistance Probability")+
   theme_light()+
   theme(text=element_text(family="Helvetica",size=12))+
   theme(plot.title = element_text(hjust = -0.1))
@@ -151,21 +151,40 @@ colours<- c("#AA0DFE", "#3283FE", "#85660D", "#782AB6", "#565656",
               "#B10DA1", "#C075A6", "#FC1CBF", "#B00068", "#FBE426", 
               "#FA0087")
 names(colours)<-sort(unique(all_average_curves$genus))
+genus_list<-unique(all_average_curves$genus)
+all_curve_plots<-c()
+for (i in 1:length(colours)){
+  line_data<-filter(all_average_curves, genus==genus_list[i])
+  point_data <-filter(data, genus==genus_list[i])
+  all_curve_plots[[i]]<-ggplot(line_data,aes(age,mean))+
+    geom_point(data=point_data,aes(x=age,y=resistant/(resistant+susceptible),colour=genus,shape=class,fill=genus),size=0.8)+
+    geom_line(aes(colour=genus))+
+    geom_ribbon(aes(ymin =lower, ymax = upper,fill=genus,colour=genus), outline.type = "both", alpha = 0.2,linetype="dashed",show.legend=F)+
+    ylim(0,1)+
+    xlim(0,100)+
+    labs(title=genus_list[i], x="Age", y="Resistance Probability")+
+    theme_minimal()+
+    scale_colour_manual(values=colours)+
+    scale_fill_manual(values=colours)+
+    scale_shape_manual(values=shapes)+
+    facet_wrap(.~class)+
+    theme(text = element_text(size=6),legend.position="none", plot.title = element_text(hjust = 0.5))
+}
 
-all_curve_plots<-ggplot(all_average_curves,aes(age,mean))+
-  #geom_point(data=data,aes(x=age,y=resistant/(resistant+susceptible),colour=genus,shape=class,fill=genus),size=0.8)+
-  geom_line(aes(colour=genus))+
-  geom_ribbon(aes(ymin =lower, ymax = upper,fill=genus,colour=genus), outline.type = "both", alpha = 0.2,linetype="dashed",show.legend=F)+
-  ylim(0,1)+
-  xlim(0,100)+
-  labs(x="Age", y="Resistance Frequency")+
-  theme_minimal()+
-  scale_colour_manual(values=colours)+
-  scale_fill_manual(values=colours)+
-  scale_shape_manual(values=shapes)+
-  facet_grid(rows=vars(str_wrap(class,15)),cols=vars(genus),switch = "both",drop=T)+
-  theme(axis.text.x=element_blank(),axis.ticks.x=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank(),
-        legend.position="none", strip.text.y.left = element_text(angle = 0,hjust=1),strip.text.x.bottom = element_text(angle = 90,hjust=1))
+# all_curve_plots<-ggplot(all_average_curves,aes(age,mean))+
+#   #geom_point(data=data,aes(x=age,y=resistant/(resistant+susceptible),colour=genus,shape=class,fill=genus),size=0.8)+
+#   geom_line(aes(colour=genus))+
+#   geom_ribbon(aes(ymin =lower, ymax = upper,fill=genus,colour=genus), outline.type = "both", alpha = 0.2,linetype="dashed",show.legend=F)+
+#   ylim(0,1)+
+#   xlim(0,100)+
+#   labs(x="Age", y="Resistance Probability")+
+#   theme_minimal()+
+#   scale_colour_manual(values=colours)+
+#   scale_fill_manual(values=colours)+
+#   scale_shape_manual(values=shapes)+
+#   facet_grid(rows=vars(str_wrap(class,15)),cols=vars(genus),switch = "both",drop=T)+
+#   theme(axis.text.x=element_blank(),axis.ticks.x=element_blank(),axis.text.y=element_blank(),axis.ticks.y=element_blank(),
+#         legend.position="none", strip.text.y.left = element_text(angle = 0,hjust=1),strip.text.x.bottom = element_text(angle = 90,hjust=1))
 
 # Plot 4 example curves
 examples<-c("Penicillins:Proteus","Polymyxins:Pseudomonas","Quinolones:Acinetobacter","Cephalosporins:Streptococcus")
@@ -179,7 +198,7 @@ example_plots<-ggplot(example_curves,aes(age,mean))+
   geom_line(aes(colour=genus))+
   geom_ribbon(aes(ymin =lower, ymax = upper,fill=genus,colour=genus), outline.type = "both", alpha = 0.2,linetype="dashed",show.legend=F)+
   xlim(0,100)+
-  labs(x="Age", y=str_wrap("Resistance Frequency",20))+
+  labs(x="Age", y=str_wrap("Resistance Probability",20))+
   theme_minimal()+
   scale_colour_manual(values=colours)+
   scale_fill_manual(values=colours)+
@@ -187,7 +206,7 @@ example_plots<-ggplot(example_curves,aes(age,mean))+
   facet_grid(cols=vars(factor(facet_label, levels = examples_stacked)),scales="free_y")+
   theme(legend.position="none", strip.text.y=element_blank(),text=element_text(family="Helvetica",size=10))
 
-# Calculate maximum fold change in resistance frequency for all curves
+# Calculate maximum fold change in resistance probability for all curves
 minmax<-all_average_curves %>% group_by(id) %>% 
   summarise(min=min(mean),max=max(mean),var=sum(variance),mean=mean,age=age) %>% distinct() %>% 
   separate(id,c("class","genus"),sep=":",remove=F) %>% filter(min==mean|max==mean) %>% mutate(x=ifelse(mean==min,"age_min","age_max")) %>% 
@@ -196,13 +215,13 @@ minmax<-all_average_curves %>% group_by(id) %>%
   mutate(directional_change=ifelse(age_min>age_max,min-max,max-min)) %>% 
   mutate(directional_fold_change=ifelse(age_min>age_max,min/max,max/min)) %>% ungroup() 
 
-# Plot maximum fold change in resistance frequency for all curves
+# Plot maximum fold change in resistance probability for all curves
 minmax$class <- factor(minmax$class, levels = rev(sort(as.vector(unique(minmax$class)))))
 curve_bubbleplot<-ggplot(minmax, aes(x = genus, y = fct_relabel(class,str_wrap,width = 16)))+
   geom_point(aes(size=log(1/var),fill=log(directional_fold_change)),shape=21,stroke=0.3,colour="grey")+
   scale_size(name= "Log (1/Variance)",range = c(1,10))+
   theme_light()+
-  scale_fill_gradient2(name="Log (Fold Change in Resistance Frequency)",low="mediumseagreen",mid="white",high = "mediumpurple",midpoint=0)+
+  scale_fill_gradient2(name="Log (Fold Change)",low="mediumseagreen",mid="white",high = "mediumpurple",midpoint=0)+
   labs(x=NULL,y=NULL)+
   theme(axis.text.x=element_text(angle=30,hjust=1),text=element_text(family="Helvetica",size=10), legend.position = "none",legend.title.align=0.5)+
   guides(size = guide_legend(override.aes = list(colour = "grey",shape=21,stroke=1)), title.position = "top")+
@@ -228,18 +247,23 @@ point_graph<-ggplot(data = filter(average_parameters,!id %in% examples),aes(Line
   scale_colour_manual(name="Bacteria",values=colours)+
   scale_shape_manual(name="Antibiotic",values=shapes)+
   theme(text=element_text(family="Helvetica",size=10), legend.position = "none")+
-  guides(colour=guide_legend(ncol=2,byrow=FALSE,keyheight = 0.3,keywidth=0.3))+
-  guides(shape=guide_legend(ncol=2 ,byrow=FALSE,keyheight = 0.3,keywidth=0.3))
+  guides(colour=guide_legend(ncol=1,byrow=FALSE,keyheight = 0.3,keywidth=0.3))+
+  guides(shape=guide_legend(ncol=1 ,byrow=FALSE,keyheight = 0.3,keywidth=0.3))
 
 # Arranging Plots
-sample_size_plot + plot_annotation(title="B")
-p_overall + random_variance_plot + plot_annotation(tag_levels = 'A') 
-point_graph / example_plots / curve_bubbleplot + plot_layout(heights = c(4,1,4)) + plot_annotation(tag_levels = 'A')
+fig1<-sample_size_plot
+fig2<-p_overall + random_variance_plot + plot_annotation(tag_levels = 'A') 
+fig3<-point_graph / example_plots / curve_bubbleplot + plot_layout(heights = c(4,1,4)) + plot_annotation(tag_levels = 'A')
 legend1 <- get_legend(point_graph + theme(legend.position = "right",legend.box="vertical"))
-legend2 <- get_legend(curve_bubbleplot+ theme(legend.position = "right", legend.box="vertical"))
-plot_grid(legend1, ncol = 1)
-plot_grid(legend2, ncol = 1)
-all_curve_plots
+legend2 <- get_legend(curve_bubbleplot+ theme(legend.position = "bottom", legend.box="horizontal"))
+legend1<-plot_grid(legend1, ncol = 1)
+legend2<-plot_grid(legend2, ncol = 1)
+
+wrap_plots(all_curve_plots[1:6], ncol = 2)
+wrap_plots(all_curve_plots[7:12], ncol = 2)
+wrap_plots(all_curve_plots[13:18], ncol = 2)
+wrap_plots(all_curve_plots[19:24], ncol = 2)
+all_curve_plots[25]
 
 # Graph for change in population structure (2022, 2050, 2100)
 population<-read.csv("population.csv") %>% filter(year %in% c(2022, 2050,2100)) %>% 
@@ -253,7 +277,7 @@ ggplot(population, aes(age,proportion,colour=as.factor(year)))+
   scale_colour_manual(values=c("mediumpurple","indianred","mediumseagreen"), name="Year")+
   theme_light()
 
-# Graph for change in resistance frequency with population structure
+# Graph for change in resistance probability with population structure
 average_resistance<-read.csv("population.csv") %>% 
   group_by(year) %>% 
   summarise(total=sum(population), age=age, population=population) %>% ungroup() %>%
@@ -267,7 +291,7 @@ average_resistance<-read.csv("population.csv") %>%
 
 ggplot(average_resistance, aes(year, mean_resistance))+
   geom_line(aes(colour=genus))+
-  labs(x="Year", y="Resistance Frequency")+
+  labs(x="Year", y="Resistance Probability")+
   theme_light()+
   theme(legend.position="none")+
   scale_colour_manual(values=colours,name="Antibiotic:Bacteria", labels=c("Quinolones:Acinetobacter", "Penicillins:Proteus","Polymyxins:Pseudomonas","Cephalosporins:Streptococcus"))
