@@ -18,7 +18,7 @@ library(gtools)
 # setwd("~/OneDrive - University of Edinburgh/Age_AMR/Age-AMR_Github")
 # write.csv(all_data,"all_data.csv",row.names=FALSE)
 
-# "all_data.csv", "master_spreadsheet.csv", "Drug Classes.csv" and "genus.csv" are included as supporting files.
+# "all_data.csv", "master_spreadsheet.csv", "Drug Classes.csv", "genus.csv" and "dataset_2.csv" are included in the supporting dataset.
 setwd("~/OneDrive - University of Edinburgh/Age_AMR/Age-AMR_Github")
 all_data<-read.csv("all_data.csv")
 
@@ -39,7 +39,7 @@ all_data<-anti_join(all_data,no_resistance,by="paper_dataset")
 all_data$paper<-as.numeric(all_data$paper)
 
 # Define drug, bug, class and genus (ESBL and B-lactamase are tested using cephalosporins, drug for AmpC not defined) for each dataset
-master_spreadsheet<-read.csv("master_spreadsheet.csv") %>% rename(paper=Paper) %>% separate_rows(Coder, sep="; ",convert = TRUE)  %>% separate(Coder,c("dataset","coder"),sep=" = ")  %>% separate(coder,c("drug","bug","coder"),sep="_")%>% 
+master_spreadsheet<-read.csv("master_spreadsheet.csv")[1:2] %>% rename(paper=Paper) %>% separate_rows(Coder, sep="; ",convert = TRUE)  %>% separate(Coder,c("dataset","coder"),sep=" = ")  %>% separate(coder,c("drug","bug","coder"),sep="_")%>% 
   mutate(drug=ifelse(drug=="ESBL"|drug=="B-lactamase","cephalosporin",drug)) %>% filter(drug!="AmpC") %>%
   full_join(read.csv("Drug Classes.csv"),by="drug") %>% full_join(read.csv("genus.csv"),by="bug")
 

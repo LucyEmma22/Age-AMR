@@ -104,7 +104,7 @@ for (i in 1:ncol(all_results)){
   average_parameters<-rbind(average_parameters,mean_and_CI)
 }
 
-write.csv(average_parameters,file="average_parameters.csv",row.names=FALSE)
+write.csv(average_parameters,file="average_parameters.csv",row.names=FALSE) # Included in the supplementary dataset
 
 ##########################################################################################################
 # CALCULATE THE RESISTANCE PROBABILITY AT AGE 0-100 FOR EVERY EFFECT AT EVERY ITERATION (CURVES)
@@ -158,4 +158,4 @@ for (j in 1:length(all_drug_bug_interaction_list)){
   
 }
 
-write.csv(all_average_curves,file="all_average_curves_new.csv",row.names=FALSE)
+write.csv(all_average_curves,file="all_average_curves_new.csv",row.names=FALSE) # Included in the supplementary dataset
